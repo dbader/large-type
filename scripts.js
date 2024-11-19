@@ -32,6 +32,14 @@ window.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    function isEmoji(seg) {
+      if (window.Intl && window.Intl.Segmenter) {
+        return seg.match(/\p{Emoji}\uFE0F|\p{Emoji_Presentation}/u);
+      } else {
+        return false;
+      }
+    }
+
     function renderText() {
         // Return a space as typing indicator if text is empty.
         var text = decodeURIComponent(location.hash.split('#')[1] || ' ');
@@ -67,7 +75,7 @@ window.addEventListener('DOMContentLoaded', function() {
                 // (All browsers that support `Intl.Segmenter` also support
                 // these Unicode property class escapes.)
                 // [1]: https://unicode.org/reports/tr51/#Emoji_Properties
-                if (seg.match(/\p{Emoji}\uFE0F|\p{Emoji_Presentation}/u)) {
+                if (isEmoji(seg)) {
                     textWidth += 1.65; // Roughly measured.
                 } else {
                     textWidth += 1;
@@ -83,20 +91,22 @@ window.addEventListener('DOMContentLoaded', function() {
 
         var fontSize = Math.min(150 / textWidth, 30);
 
-        forEachSegment(function(str) {
+        forEachSegment(function(seg) {
             var charbox = charboxTemplate.content.cloneNode(true);
             var charElem = charbox.querySelector('.char');
             charElem.style.fontSize = fontSize + 'vw';
 
-            if (str !== ' ') {
-                charElem.textContent = str;
+            if (seg !== ' ') {
+                charElem.textContent = seg;
             } else {
                 charElem.innerHTML = '&nbsp;';
             }
 
-            if (str.match(/[0-9]/i)) {
+            if (isEmoji(seg)) {
+                charElem.className = 'emoji';
+            } else if (seg.match(/[0-9]/i)) {
                 charElem.className = 'number';
-            } else if (!str.match(/\p{L}/iu)) {
+            } else if (!seg.match(/\p{L}/iu)) {
                 charElem.className = 'symbol';
             }
 

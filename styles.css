@@ -117,7 +117,7 @@ input::-webkit-input-placeholder {
 }
 
 .blurred {
-    -webkit-filter: blur(5px) grayscale(50%);
+    filter: blur(5px) grayscale(50%);
     pointer-events: none;
 }
 
@@ -179,6 +179,10 @@ input::-webkit-input-placeholder {
 
 .text li .symbol {
     color: #b94669;
+}
+
+.text li .emoji {
+    height: 1.1645em;
 }
 
 .text li:nth-child(odd) {

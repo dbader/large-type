@@ -30,7 +30,7 @@ Here are some ideas:
 * Embed it in your own apps?
     * `'http://large-type.com/#' + encodeURIComponent('Your Text Here')`
 * Profess your love from a runaway train?
-    * [large-type.com/#I❤U](http://large-type.com/#I❤U)
+    * [large-type.com/#I❤️U](http://large-type.com/#I❤️U)
 
 ### How secure is it?
 
