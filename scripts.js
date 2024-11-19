@@ -35,24 +35,68 @@ window.addEventListener('DOMContentLoaded', function() {
     function renderText() {
         // Return a space as typing indicator if text is empty.
         var text = decodeURIComponent(location.hash.split('#')[1] || ' ');
-        var fontSize = Math.min(150 / text.length, 30);
 
         clearChars();
 
-        text.split(/.*?/u).forEach(function(chr) {
+        var textWidth = null;
+        var forEachSegment = null;
+        if (window.Intl && window.Intl.Segmenter) {
+            // Emoji-friendly path -- needs Intl.Segmenter support
+            var segmenter = new Intl.Segmenter();
+            var segments = Array.from(segmenter.segment(text));
+            forEachSegment = function forEachGraphemeSegment(f) {
+                segments.forEach(function(seg) {
+                    f.call(this, seg.segment, seg.index);
+                });
+            };
+
+            textWidth = 0;
+            forEachSegment(function(seg) {
+                // Unicode.org specifies these properties as follows [1]:
+                //  - `Emoji`: "characters that are emoji"
+                //  - `Emoji_Presentation`: "characters that have emoji
+                //    presentation by default"
+                // Take for example '☺' (U+263A): this is a "legacy"
+                // emoji that is not _presented_ as an emoji by default (but
+                // rather as a monospace / monochrome pictograph). As such,
+                // it does have propery `Emoji` but not `Emoji_Presentation`.
+                // In order to present such "legacy" emojis as emojis, they
+                // must be followed by U+FE0F (variation selector 16).
+                // Contrast that with '😃' (U+1F603), which *is* presented
+                // as an emoji by default, and as such has _both_ poperties.
+                // (All browsers that support `Intl.Segmenter` also support
+                // these Unicode property class escapes.)
+                // [1]: https://unicode.org/reports/tr51/#Emoji_Properties
+                if (seg.match(/\p{Emoji}\uFE0F|\p{Emoji_Presentation}/u)) {
+                    textWidth += 1.65; // Roughly measured.
+                } else {
+                    textWidth += 1;
+                }
+            });
+        } else {
+            // Backward compatibility -- no Intl.Segmenter support
+            textWidth = text.length;
+            forEachSegment = function forEachCharSegment(f) {
+                text.split(/.*?/u).forEach(f);
+            };
+        }
+
+        var fontSize = Math.min(150 / textWidth, 30);
+
+        forEachSegment(function(str) {
             var charbox = charboxTemplate.content.cloneNode(true);
             var charElem = charbox.querySelector('.char');
             charElem.style.fontSize = fontSize + 'vw';
 
-            if (chr !== ' ') {
-                charElem.textContent = chr;
+            if (str !== ' ') {
+                charElem.textContent = str;
             } else {
                 charElem.innerHTML = '&nbsp;';
             }
 
-            if (chr.match(/[0-9]/i)) {
+            if (str.match(/[0-9]/i)) {
                 charElem.className = 'number';
-            } else if (!chr.match(/\p{L}/iu)) {
+            } else if (!str.match(/\p{L}/iu)) {
                 charElem.className = 'symbol';
             }
 
