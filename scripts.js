@@ -41,6 +41,7 @@ window.addEventListener('DOMContentLoaded', function() {
         var textWidth = null;
         var forEachSegment = null;
         if (window.Intl && window.Intl.Segmenter) {
+            // Emoji-friendly path -- needs Intl.Segmenter support
             var segmenter = new Intl.Segmenter();
             var segments = Array.from(segmenter.segment(text));
             forEachSegment = function forEachGraphemeSegment(f) {
@@ -72,10 +73,8 @@ window.addEventListener('DOMContentLoaded', function() {
                     textWidth += 1;
                 }
             });
-        }
-
-        // Backward compatibility
-        else {
+        } else {
+            // Backward compatibility -- no Intl.Segmenter support
             textWidth = text.length;
             forEachSegment = function forEachCharSegment(f) {
                 text.split(/.*?/u).forEach(f);
