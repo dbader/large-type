@@ -12,6 +12,16 @@ window.addEventListener('DOMContentLoaded', function() {
 
     var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
+    var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.getElementById('darktoggle').addEventListener('click', () => setDarkMode(!isDarkMode));
+    setDarkMode(isDarkMode);
+
+    function setDarkMode(darkMode) {
+        isDarkMode = darkMode; 
+        document.getElementById('darktoggle').innerText = isDarkMode ? '☀️' : '🌑';
+        document.body.classList.toggle('dark-mode', isDarkMode);
+    }
+
     function updateFragment(text) {
         // Don't spam the browser history & strip query strings.
         window.location.replace(location.origin + '/#' + encodeURIComponent(text));
